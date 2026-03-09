@@ -3,9 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login Page</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <p>Tarak Nath Dey</p>
+    <div class="container">
+        <div class="container1">
+            <form id="loginForm">
+                <div class="container2">
+                    <!-- Sign In label above inputs -->
+                    <h1 id="heading">Sign In</h1>
+
+                    <input type="text" name="username" id="uname" placeholder="Enter Username">
+                    <input type="password" name="password" id="pass" placeholder="Enter Password">
+                    <div id="msg" style="margin-bottom:0px; font-weight:bold;"></div>
+                    <input type="submit" value="Login" id="signin">
+                    <span>Don't have an account?<input type="button" value="Create new account" id="create"></span>
+                    <input type="button" value="Forgot Password?" id="forgot" style="text-decoration: underline;">
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="modal">
+        <div class="modal-content">
+            <h2>Forgot Password</h2>
+            <p>Please contact the administrator to reset your password.</p>
+            <button id="closeModal">OK</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

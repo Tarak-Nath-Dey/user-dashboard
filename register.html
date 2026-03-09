@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - User Management System</title>
+    <link rel="stylesheet" href="style1.css">
+</head>
+<body>
+    <div class="container">
+        <div class="registration-wrapper">
+            <!-- Header Section -->
+            <div class="header-section">
+                <h1 id="heading">Create Your Account</h1>
+                <p class="subtitle">Join us today and get started</p>
+            </div>
+
+            <!-- Registration Form -->
+            <form id="registerForm" method="POST" action="insertUser.php" novalidate>
+                <div class="form-section">
+                    <!-- Username Input -->
+                    <div class="form-group">
+                        <label for="uname" class="form-label">Username</label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            id="uname"
+                            placeholder="Enter a unique username" 
+                            required 
+                            minlength="3"
+                            maxlength="50"
+                            class="form-control"
+                        >
+                        <span class="help-text">At least 3 characters</span>
+                    </div>
+
+                    <!-- Email Input -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input 
+                            type="email" 
+                            name="emailId" 
+                            id="email"
+                            placeholder="Enter your email" 
+                            required
+                            class="form-control"
+                        >
+                        <span class="help-text">We'll never share your email</span>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="form-group">
+                        <label for="pass" class="form-label">Password</label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            id="pass"
+                            placeholder="Create a strong password" 
+                            required 
+                            minlength="6"
+                            maxlength="100"
+                            class="form-control"
+                        >
+                        <span class="help-text">At least 6 characters</span>
+                    </div>
+
+                    <!-- Confirm Password Input -->
+                    <div class="form-group">
+                        <label for="cpass" class="form-label">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            name="confirm_password" 
+                            id="cpass"
+                            placeholder="Re-enter your password" 
+                            required 
+                            minlength="6"
+                            maxlength="100"
+                            class="form-control"
+                        >
+                        <span class="help-text">Passwords must match</span>
+                    </div>
+
+                    <!-- Message Display -->
+                    <div id="msg" class="message-box"></div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <input 
+                            type="submit" 
+                            value="Sign Up" 
+                            id="signup"
+                            class="btn btn-primary"
+                        >
+                    </div>
+
+                    <!-- Login Link -->
+                    <p class="login-link">
+                        Already have an account? <a href="index.html">Login here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // REGISTRATION FORM LOGIC
+        // ============================================
+
+        const form = document.getElementById("registerForm");
+        const msgBox = document.getElementById("msg");
+        const signupBtn = document.getElementById("signup");
+
+        // Form submission handler
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Validate HTML5 constraints
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Get form values and trim whitespace
+            const username = document.getElementById("uname").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("pass").value;
+            const confirmPassword = document.getElementById("cpass").value;
+
+            // ============================================
+            // CLIENT-SIDE VALIDATION
+            // ============================================
+
+            // Check username length
+            if (username.length < 3) {
+                showMessage("❌ Username must be at least 3 characters!", "error");
+                return;
+            }
+
+            // Check password match
+            if (password !== confirmPassword) {
+                showMessage("❌ Passwords do not match!", "error");
+                return;
+            }
+
+            // Check password length
+            if (password.length < 6) {
+                showMessage("❌ Password must be at least 6 characters!", "error");
+                return;
+            }
+
+            // Disable button during submission
+            signupBtn.disabled = true;
+            signupBtn.value = "Registering...";
+
+            // ============================================
+            // SEND DATA TO SERVER
+            // ============================================
+
+            const formData = new FormData(form);
+
+            fetch("insertUser.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                console.log("Response status:", response.status);
+                return response.text();
+            })
+            .then(text => {
+                console.log("Raw response:", text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    console.log("Parsed data:", data);
+                    
+                    // Show debug info if available
+                    if (data.debug && data.debug.length > 0) {
+                        console.log("Debug info:", data.debug);
+                    }
+                    
+                    // Show appropriate message
+                    if (data.status === "success") {
+                        showMessage("✔ " + data.message, "success");
+                        form.reset();
+                        
+                        // Redirect after 1.5 seconds
+                        setTimeout(() => {
+                            window.location.href = "index.html";
+                        }, 1500);
+                    } else {
+                        showMessage("❌ " + data.message, "error");
+                    }
+                } catch (e) {
+                    console.error("JSON Parse Error:", e);
+                    console.error("Raw Response:", text);
+                    showMessage("❌ " + text, "error");
+                }
+            })
+            .catch(error => {
+                console.error("Fetch Error:", error);
+                showMessage("❌ Network error! " + error.message, "error");
+            })
+            .finally(() => {
+                signupBtn.disabled = false;
+                signupBtn.value = "Sign Up";
+            });
+        });
+
+        // ============================================
+        // BACK TO LOGIN BUTTON
+        // ============================================
+
+        document.getElementById("backLogin").addEventListener("click", () => {
+            window.location.href = "index.html";
+        });
+
+        // ============================================
+        // HELPER FUNCTION: SHOW MESSAGE
+        // ============================================
+
+        function showMessage(text, type) {
+            msgBox.textContent = text;
+            msgBox.className = "message-box " + type;
+            msgBox.style.display = "flex";
+        }
+
+        // ============================================
+        // REAL-TIME PASSWORD MATCH VALIDATION
+        // ============================================
+
+        const passInput = document.getElementById("pass");
+        const cpassInput = document.getElementById("cpass");
+
+        cpassInput.addEventListener("input", function () {
+            if (cpassInput.value && passInput.value !== cpassInput.value) {
+                cpassInput.style.borderColor = "var(--color-error)";
+            } else {
+                cpassInput.style.borderColor = "var(--color-border)";
+            }
+        });
+    </script>
+</body>
+</html>
